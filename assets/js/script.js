@@ -96,7 +96,7 @@ $(".list-group").on("click", "span", function() {
   dateInput.trigger("focus");
 });
 
-$(".list-grou[").on("blur", "input[type ='text']", function() {
+$(".list-group").on("blur", "input[type ='text']", function() {
   var date = $(this)
     .val()
     .trim();
