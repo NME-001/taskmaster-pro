@@ -13,8 +13,28 @@ var createTask = function(taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+  auditTask(taskLi);
+
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
+};
+
+var auditTask = function(taskEl) {
+  var date = $(taskEl)
+    .find("span")
+    .text()
+    .trim();
+
+  var time = moment(date, "L").set("hour", 17);
+
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+
+  if (moment().isAfter(time)) {
+    $(taskEl).addClass("list-group-item-danger");
+  }
+  else if (Math.abs(moment().diff(time, "days")) <= 2) {
+    $(taskEl).addClass("list-group-item-warning");
+  }
 };
 
 var loadTasks = function() {
@@ -141,12 +161,15 @@ $("#task-form-modal .btn-primary").click(function() {
 
     // save in tasks array
     tasks.toDo.push({
-      text: taskText,
       date: taskDate
     });
 
     saveTasks();
   }
+});
+
+$("#modalDueDate").datepicker({
+  minDate: 1
 });
 
 // task text was clicked
@@ -198,12 +221,17 @@ $(".list-group").on("click", "span", function() {
     .text()
     .trim();
 
-  // create new input element
-  var dateInput = $("<input>")
-    .attr("type", "text")
-    .addClass("form-control")
-    .val(date);
+  var dateInput = $("<input>").attr("type", "text").addClass("form-control").val(date);
+
   $(this).replaceWith(dateInput);
+
+  // create new input element
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function() {
+      $(this).trigger("change");
+    }
+  });
 
   // automatically bring up the calendar
   dateInput.trigger("focus");
@@ -230,7 +258,9 @@ $(".list-group").on("change", "input[type='text']", function() {
   var taskSpan = $("<span>")
     .addClass("badge badge-primary badge-pill")
     .text(date);
-    $(this).replaceWith(taskSpan);
+  $(this).replaceWith(taskSpan);
+
+  auditTask($(taskSpan).closest(".list-group-item"));
 });
 
 // remove all tasks
